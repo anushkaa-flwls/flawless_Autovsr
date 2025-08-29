@@ -9,14 +9,13 @@
 from typing import Any, List, Tuple
 
 import torch
-from espnet.nets.pytorch_backend.nets_utils import rename_state_dict
-from espnet.nets.pytorch_backend.transformer.attention import MultiHeadedAttention
-from espnet.nets.pytorch_backend.transformer.embedding import PositionalEncoding
-from espnet.nets.pytorch_backend.transformer.layer_norm import LayerNorm
-from espnet.nets.pytorch_backend.transformer.mask import subsequent_mask
-from espnet.nets.pytorch_backend.transformer.positionwise_feed_forward import PositionwiseFeedForward
-from espnet.nets.pytorch_backend.transformer.repeat import repeat
-from espnet.nets.scorer_interface import BatchScorerInterface
+from ..nets_utils import rename_state_dict
+from ..transformer.embedding import PositionalEncoding, RelPositionalEncoding
+from ..transformer.layer_norm import LayerNorm
+from ..transformer.positionwise_feed_forward import PositionwiseFeedForward
+from ..transformer.repeat import repeat
+from ...scorer_interface import BatchScorerInterface
+from ..transformer.attention import MultiHeadedAttention
 
 
 class DecoderLayer(torch.nn.Module):

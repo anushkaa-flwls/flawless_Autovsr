@@ -189,6 +189,8 @@ class ResNet1D(nn.Module):
         """forward.
         :param x: torch.Tensor, input tensor with input size (B, C, T)
         """
+        
+   
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)

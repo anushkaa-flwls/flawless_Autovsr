@@ -6,16 +6,16 @@
 
 import torch
 
-from espnet.nets.pytorch_backend.frontend.resnet import video_resnet
-from espnet.nets.pytorch_backend.frontend.resnet1d import audio_resnet
-from espnet.nets.pytorch_backend.ctc import CTC
-from espnet.nets.pytorch_backend.encoder.conformer_encoder import ConformerEncoder
-from espnet.nets.pytorch_backend.decoder.transformer_decoder import TransformerDecoder
-from espnet.nets.pytorch_backend.nets_utils import make_non_pad_mask, th_accuracy
-from espnet.nets.pytorch_backend.transformer.add_sos_eos import add_sos_eos
-from espnet.nets.pytorch_backend.transformer.label_smoothing_loss import LabelSmoothingLoss
-from espnet.nets.pytorch_backend.transformer.mask import target_mask
-from espnet.nets.scorers.ctc import CTCPrefixScorer
+from .frontend.resnet import video_resnet
+from .frontend.resnet1d import audio_resnet
+from .ctc import CTC
+from .encoder.conformer_encoder import ConformerEncoder
+from .decoder.transformer_decoder import TransformerDecoder
+from .nets_utils import make_non_pad_mask, th_accuracy
+from .transformer.add_sos_eos import add_sos_eos
+from .transformer.label_smoothing_loss import LabelSmoothingLoss
+from .transformer.mask import target_mask
+from ..scorers.ctc import CTCPrefixScorer
 
 
 class E2E(torch.nn.Module):
@@ -56,20 +56,23 @@ class E2E(torch.nn.Module):
         self.ctc_weight = ctc_weight
         self.ctc = CTC(odim, 768, 0.1, reduce=True)
         self.criterion = LabelSmoothingLoss(self.odim, self.ignore_id, 0.1, False)
-
+  
     def scorers(self):
         return dict(decoder=self.decoder, ctc=CTCPrefixScorer(self.ctc, self.eos))
 
-    def forward(self, x, lengths, label):
+    def forward(self, x, lengths ,  audio_embeddings=None):  #torch.Size([4, 64000, 1]) Audio shape
         if self.modality == "audio":
             lengths = torch.div(lengths, 640, rounding_mode="trunc")
 
         padding_mask = make_non_pad_mask(lengths).to(x.device).unsqueeze(-2)
-
+    
         x = self.frontend(x)
         x = self.proj_encoder(x)
         x, _ = self.encoder(x, padding_mask)
-
+        if audio_embeddings is  None:
+            return x 
+        
+            
         # ctc loss
         loss_ctc, ys_hat = self.ctc(x, lengths, label)
 
